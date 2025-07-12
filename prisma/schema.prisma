@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  location      String?  // optional
+  image         String?  // profile photo (optional)
+  availability  String?  // e.g., weekends, evenings
+  isPublic      Boolean  @default(true)
+  role          Role     @default(USER)
+  skills        Skill[]
+  swapRequestsSent     SwapRequest[] @relation("SentRequests")
+  swapRequestsReceived SwapRequest[] @relation("ReceivedRequests")
+  banned        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  type      SkillType
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  approved  Boolean  @default(true) // for admin moderation
+  // Add opposite relations for SwapRequest
+  offeredInRequests SwapRequest[] @relation("OfferedSkill")
+  wantedInRequests  SwapRequest[] @relation("WantedSkill")
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+enum SkillType {
+  OFFERED
+  WANTED
+}
+
+model SwapRequest {
+  id            String   @id @default(cuid())
+  fromUser      User     @relation("SentRequests", fields: [fromUserId], references: [id])
+  fromUserId    String
+  toUser        User     @relation("ReceivedRequests", fields: [toUserId], references: [id])
+  toUserId      String
+  offeredSkill  Skill    @relation("OfferedSkill", fields: [offeredSkillId], references: [id])
+  offeredSkillId String
+  wantedSkill   Skill    @relation("WantedSkill", fields: [wantedSkillId], references: [id])
+  wantedSkillId String
+  message       String?
+  status        SwapStatus @default(PENDING)
+  feedback      Feedback?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+enum SwapStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  swap        SwapRequest @relation(fields: [swapId], references: [id])
+  swapId      String   @unique
+  rating      Int      // 1-5
+  comment     String?
+  createdAt   DateTime @default(now())
+}
