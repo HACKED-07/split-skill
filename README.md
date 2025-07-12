@@ -1,3 +1,30 @@
+# Split Skill
+
+## Setup & Start
+
+1. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+2. **Set up the database:**
+   ```sh
+   npx prisma migrate dev --name init
+   npx prisma db seed
+   ```
+3. **Start the development server:**
+   ```sh
+   npm run dev
+   ```
+   The app will be available at [http://localhost:3000](http://localhost:3000).
+
+**Optional:** To reset and reseed the database:
+```sh
+npx prisma migrate reset
+npx prisma db seed
+```
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
